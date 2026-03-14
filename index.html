@@ -1407,8 +1407,9 @@ function showScreen(id) {
   const el = document.getElementById(id);
   el.style.display = (id==='student-screen'||id==='admin-screen') ? 'block' : 'flex';
   el.classList.add('active');
+  // FAB is managed by sPage() — hide it when leaving student screen entirely
   const fab = document.getElementById('ask-ai-fab');
-  if (fab) fab.style.display = id === 'student-screen' ? 'flex' : 'none';
+  if (fab && id !== 'student-screen') fab.style.display = 'none';
 }
 function showAdminLogin() { document.getElementById('auth-screen').style.display='none'; const e=document.getElementById('admin-login-screen'); e.style.display='flex'; e.classList.add('active'); }
 function showStudentLogin() { document.getElementById('admin-login-screen').style.display='none'; document.getElementById('auth-screen').style.display='flex'; }
@@ -1593,6 +1594,9 @@ function sPage(n, btn) {
   if (n === 'quiz') buildQSel();
   if (n === 'guide') initGuide();
   if (n === 'essay') { initEssayPage(); loadEssays(); }
+  // Hide FAB when already on Ask AI page, show on all other pages
+  const fab = document.getElementById('ask-ai-fab');
+  if (fab) fab.style.display = n === 'ask' ? 'none' : 'flex';
 }
 
 function sPageM(n, btn) {
@@ -1605,6 +1609,9 @@ function sPageM(n, btn) {
   if (n === 'quiz') buildQSel();
   if (n === 'guide') initGuide();
   if (n === 'essay') { initEssayPage(); loadEssays(); }
+  // Hide FAB when already on Ask AI page
+  const fab = document.getElementById('ask-ai-fab');
+  if (fab) fab.style.display = n === 'ask' ? 'none' : 'flex';
 }
 
 // Department → subjects mapping for filtering
