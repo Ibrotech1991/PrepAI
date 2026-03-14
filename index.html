@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#1A1208"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="PrepAI"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <title>PrepAI – WAEC Study System</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Righteous&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -399,7 +404,77 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,122,0,.03);
   .tbl-wrap{overflow-x:auto;}.dash-hero::before{display:none;}.dash-title{font-size:22px;}.adm-links{display:none;}
 }
 @media(max-width:480px){.subj-grid,.ssel-grid{grid-template-columns:1fr;}.auth-card{padding:24px 18px;}.q-txt{font-size:15px;}}
-.ask-ai-fab{position:fixed;bottom:80px;right:18px;z-index:9999;background:linear-gradient(135deg,#FF7A00,#FFD234);color:#1A1208;border:none;border-radius:50px;padding:13px 20px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 4px 20px rgba(255,122,0,.5);display:flex;align-items:center;gap:8px;transition:transform .18s,box-shadow .18s;text-decoration:none;}.ask-ai-fab:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 28px rgba(255,122,0,.65);}.fab-pulse{width:8px;height:8px;background:#1A1208;border-radius:50%;animation:pulse-dot 1.4s infinite;}@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}@media(max-width:768px){.ask-ai-fab{bottom:72px;right:14px;padding:11px 16px;font-size:12px;}}</style>
+.ask-ai-fab{position:fixed;bottom:80px;right:18px;z-index:9999;background:linear-gradient(135deg,#FF7A00,#FFD234);color:#1A1208;border:none;border-radius:50px;padding:13px 20px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 4px 20px rgba(255,122,0,.5);align-items:center;gap:8px;transition:transform .18s,box-shadow .18s;text-decoration:none;}.ask-ai-fab:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 28px rgba(255,122,0,.65);}.fab-pulse{width:8px;height:8px;background:#1A1208;border-radius:50%;animation:pulse-dot 1.4s infinite;}@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}@media(max-width:768px){.ask-ai-fab{bottom:72px;right:14px;padding:11px 16px;font-size:12px;}}
+/* ── IPAD / TABLET (768px–1024px) ── */
+@media(min-width:769px) and (max-width:1024px){
+  .pw{max-width:700px;}
+  .subj-grid,.ssel-grid{grid-template-columns:repeat(3,1fr);}
+  .stats-row{grid-template-columns:repeat(4,1fr);}
+  .fr{grid-template-columns:1fr 1fr;}
+}
+/* ── LARGE PHONE / SMALL TABLET ── */
+@media(max-width:600px){
+  .pw{padding:0 12px;}
+  .main-nav{height:56px;padding:0 14px;}
+  .dash-title{font-size:20px;}
+  .sc{padding:12px 8px;}
+  .sc-val{font-size:22px;}
+  .nb{font-size:12px;padding:6px 10px;}
+  .essay-card,.note-card{border-radius:12px;}
+  .q-card{padding:16px;}
+  .btn-p,.btn-s,.btn-y{padding:10px 16px;font-size:13px;}
+  .chat-card{border-radius:14px;}
+  .aform{padding:16px;}
+}
+/* ── SMALL PHONES (iPhone SE, older Android) ── */
+@media(max-width:375px){
+  .subj-grid,.ssel-grid{grid-template-columns:1fr 1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .dash-title{font-size:18px;}
+  .sc-val{font-size:20px;}
+  .ob{font-size:13px;padding:12px 14px;}
+}
+/* ── iOS SAFE AREA (iPhone notch / Dynamic Island / home bar) ── */
+@supports(padding:max(0px)){
+  .mob-nav{padding-bottom:max(12px,env(safe-area-inset-bottom));}
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+}
+/* ── iOS / SAFARI FIXES ── */
+input,textarea,select{-webkit-appearance:none;appearance:none;border-radius:0;}
+input[type="text"],input[type="email"],input[type="password"],input[type="number"],textarea{font-size:16px;} /* prevents iOS zoom on focus */
+* {-webkit-overflow-scrolling:touch;}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;}
+/* ── LANDSCAPE PHONES ── */
+@media(max-height:500px) and (orientation:landscape){
+  .main-nav{height:48px;}
+  .mob-nav{display:none;}
+  .main-nav .nav-center{display:flex;}
+  .dash-hero{padding:16px 20px;}
+}
+
+/* ── MOBILE NAV CONTENT CLEARANCE ── */
+@media(max-width:768px){
+  .pw{padding-bottom:80px;} /* clear fixed mobile nav bar */
+  #student-screen{padding-bottom:0;}
+}
+/* ── SMOOTH SCROLLING EVERYWHERE ── */
+html{scroll-behavior:smooth;}
+/* ── BETTER TAP TARGETS FOR MOBILE ── */
+@media(max-width:768px){
+  .mob-nb{min-height:48px;min-width:48px;}
+  .ob{min-height:48px;}
+  .btn-p,.btn-s,.btn-y{min-height:44px;}
+  .send-btn{min-width:44px;min-height:44px;}
+}
+/* ── IPAD PRO / LARGE TABLETS (portrait) ── */
+@media(min-width:1024px) and (max-width:1366px){
+  .subj-grid,.ssel-grid{grid-template-columns:repeat(4,1fr);}
+  .stats-row{grid-template-columns:repeat(4,1fr);}
+}
+/* ── PREVENT HORIZONTAL SCROLL ON ALL DEVICES ── */
+*{box-sizing:border-box;}
+html,body{max-width:100%;overflow-x:hidden;}
+</style>
   <script src='https://cdn.jotfor.ms/agent/embedjs/019cddb8be3c7cfdbf231f7d4ee901d7349d/embed.js'></script>
 </head>
 <body>
@@ -1596,7 +1671,7 @@ function sPage(n, btn) {
   if (n === 'essay') { initEssayPage(); loadEssays(); }
   // Hide FAB when already on Ask AI page, show on all other pages
   const fab = document.getElementById('ask-ai-fab');
-  if (fab) fab.style.display = n === 'ask' ? 'none' : 'flex';
+  if (fab) { fab.style.display = n === 'ask' ? 'none' : 'flex'; fab.style.alignItems = 'center'; fab.style.gap = '8px'; }
 }
 
 function sPageM(n, btn) {
@@ -1611,7 +1686,7 @@ function sPageM(n, btn) {
   if (n === 'essay') { initEssayPage(); loadEssays(); }
   // Hide FAB when already on Ask AI page
   const fab = document.getElementById('ask-ai-fab');
-  if (fab) fab.style.display = n === 'ask' ? 'none' : 'flex';
+  if (fab) { fab.style.display = n === 'ask' ? 'none' : 'flex'; fab.style.alignItems = 'center'; fab.style.gap = '8px'; }
 }
 
 // Department → subjects mapping for filtering
