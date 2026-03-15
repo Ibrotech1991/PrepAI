@@ -404,7 +404,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,122,0,.03);
   .tbl-wrap{overflow-x:auto;}.dash-hero::before{display:none;}.dash-title{font-size:22px;}.adm-links{display:none;}
 }
 @media(max-width:480px){.subj-grid,.ssel-grid{grid-template-columns:1fr;}.auth-card{padding:24px 18px;}.q-txt{font-size:15px;}}
-.ask-ai-fab{position:fixed;bottom:80px;right:18px;z-index:9999;background:linear-gradient(135deg,#FF7A00,#FFD234);color:#1A1208;border:none;border-radius:50px;padding:13px 20px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 4px 20px rgba(255,122,0,.5);align-items:center;gap:8px;transition:transform .18s,box-shadow .18s;text-decoration:none;}.ask-ai-fab:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 28px rgba(255,122,0,.65);}.fab-pulse{width:8px;height:8px;background:#1A1208;border-radius:50%;animation:pulse-dot 1.4s infinite;}@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}@media(max-width:768px){.ask-ai-fab{bottom:72px;right:14px;padding:11px 16px;font-size:12px;}}
+
 /* ── IPAD / TABLET (768px–1024px) ── */
 @media(min-width:769px) and (max-width:1024px){
   .pw{max-width:700px;}
@@ -743,15 +743,20 @@ html,body{max-width:100%;overflow-x:hidden;}
 
   </div></div>
 
-  <div id="sp-ask" class="page" style="padding:0;display:flex;flex-direction:column;">
-    <iframe
-      id="jotform-ai-frame"
-      src="https://www.jotform.com/app/253353208004547"
-      style="width:100%;flex:1;min-height:calc(100vh - 120px);border:none;border-radius:0;display:block;"
-      allow="microphone; camera"
-      title="PAADI MI Ask AI"
-      loading="lazy">
-    </iframe>
+  <div id="sp-ask" class="page">
+    <div class="pw slim">
+      <div style="font-family:'Righteous',cursive;font-size:26px;color:var(--orange);margin-bottom:4px;">Ask AI Tutor 🤖</div>
+      <div style="color:var(--muted);font-size:13px;font-weight:600;margin-bottom:18px;">Ask anything WAEC — topics, calculations, past questions, exam tips!</div>
+      <div class="chat-card">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="cm ai"><div class="cm-sndr">PAADI MI 🤖</div><div class="cm-bubble">Hi! 👋 I'm your personal WAEC tutor. Ask me anything — Biology, Maths, Physics, Commerce — Let's get that A1! 🎓🔥</div></div>
+        </div>
+        <div class="chat-foot">
+          <textarea class="chat-inp" id="chat-inp" rows="1" placeholder="e.g. Explain photosynthesis for WAEC Biology…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+          <button class="send-btn" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="sp-guide" class="page"><div class="pw">
@@ -1550,9 +1555,7 @@ function showScreen(id) {
   const el = document.getElementById(id);
   el.style.display = (id==='student-screen'||id==='admin-screen') ? 'block' : 'flex';
   el.classList.add('active');
-  // FAB is managed by sPage() — hide it when leaving student screen entirely
-  const fab = document.getElementById('ask-ai-fab');
-  if (fab && id !== 'student-screen') fab.style.display = 'none';
+
 }
 function showAdminLogin() { document.getElementById('auth-screen').style.display='none'; const e=document.getElementById('admin-login-screen'); e.style.display='flex'; e.classList.add('active'); }
 function showStudentLogin() { document.getElementById('admin-login-screen').style.display='none'; document.getElementById('auth-screen').style.display='flex'; }
@@ -1738,8 +1741,7 @@ function sPage(n, btn) {
   if (n === 'guide') initGuide();
   if (n === 'essay') { initEssayPage(); loadEssays(); }
   // Hide FAB when already on Ask AI page, show on all other pages
-  const fab = document.getElementById('ask-ai-fab');
-  if (fab) { fab.style.display = n === 'ask' ? 'none' : 'flex'; fab.style.alignItems = 'center'; fab.style.gap = '8px'; }
+
 }
 
 function sPageM(n, btn) {
@@ -1753,8 +1755,7 @@ function sPageM(n, btn) {
   if (n === 'guide') initGuide();
   if (n === 'essay') { initEssayPage(); loadEssays(); }
   // Hide FAB when already on Ask AI page
-  const fab = document.getElementById('ask-ai-fab');
-  if (fab) { fab.style.display = n === 'ask' ? 'none' : 'flex'; fab.style.alignItems = 'center'; fab.style.gap = '8px'; }
+
 }
 
 // Department → subjects mapping for filtering
@@ -4888,12 +4889,7 @@ function insertMath(type) {
 
 </script>
 
-  <!-- Floating Ask AI Button -->
-  <button class="ask-ai-fab" onclick="sPage('ask',null)" id="ask-ai-fab" style="display:none;">
-    <span>🤖</span>
-    <span>Ask AI</span>
-    <div class="fab-pulse"></div>
-  </button>
+
 
 </body>
 </html>
