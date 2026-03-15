@@ -1956,6 +1956,7 @@ function launchQuiz() {
     sCorr: 0,
     sTotal: 0,
     sessionLen: len,
+    pending: null, // currently selected but not yet committed answer
     history: [] // store {q, chosen, correct}
   };
 
@@ -2005,15 +2006,12 @@ function renderQ() {
     '<button class="ob" onclick="pickOpt(' + i + ')" id="ob' + i + '"><span class="ol">' + L[i] + '</span>' + o + '</button>'
   ).join('');
 
-  // If revisiting a previously answered question, restore state (no reveal, just highlight chosen)
-  if (prevAnswer) {
-    document.querySelectorAll('.ob').forEach((b, i) => {
-      b.disabled = true;
-      if (i === prevAnswer.chosen) {
-        b.style.borderColor = prevAnswer.correct ? 'var(--teal)' : 'var(--pink)';
-        b.style.opacity = '0.75';
-      }
-    });
+  // If revisiting a previously answered question OR there's a pending selection, restore highlight
+  const pendingForThis = QZ.pending && QZ.pending.q.id === q.id;
+  const chosenIdx = pendingForThis ? QZ.pending.chosen : (prevAnswer ? prevAnswer.chosen : null);
+  if (chosenIdx !== null) {
+    document.getElementById('ob' + chosenIdx).style.borderColor = 'var(--orange)';
+    document.getElementById('ob' + chosenIdx).style.opacity = '0.9';
   }
 
   // Previous button
@@ -2042,49 +2040,76 @@ function renderQ() {
 }
 
 async function pickOpt(chosen) {
-  if (QZ.answered) return; // already answered this question
-  QZ.answered = true;
   const isUnlimited = QZ.sessionLen === 0;
   const idx = isUnlimited ? QZ.idx % QZ.qs.length : QZ.idx;
   const q = QZ.qs[idx];
-  const correct = chosen === q.correct_index;
 
-  // Disable all options, highlight ONLY chosen (no correct reveal)
+  // Allow changing answer — just re-highlight without re-saving
+  // Clear all option styles first
   document.querySelectorAll('.ob').forEach((b, i) => {
-    b.disabled = true;
-    if (i === chosen) {
-      b.style.borderColor = correct ? 'var(--teal)' : 'var(--pink)';
-      b.style.opacity = '0.8';
-    }
+    b.disabled = false;
+    b.style.borderColor = '';
+    b.style.opacity = '';
   });
 
-  QZ.sTotal++; if (correct) QZ.sCorr++;
-  // Only push to history if not already there (prev navigation)
-  if (!QZ.history.find(h => h.q.id === q.id)) {
-    QZ.history.push({ q, chosen, correct });
-  }
+  // Highlight the newly chosen option (no correct reveal during quiz)
+  document.getElementById('ob' + chosen).style.borderColor = 'var(--orange)';
+  document.getElementById('ob' + chosen).style.opacity = '0.9';
 
+  // Track selected answer (pending — not yet saved to DB)
+  QZ.pending = { q, chosen };
+
+  // Show Next/Submit button
   const isLast = !isUnlimited && QZ.idx + 1 >= QZ.qs.length;
   const nextBtn = document.getElementById('qz-next');
   nextBtn.style.display = 'inline-block';
-  nextBtn.textContent = isLast ? '📊 See Results →' : 'Next →';
+  nextBtn.textContent = isLast ? '📊 Submit & See Results →' : 'Next →';
   nextBtn.onclick = isLast ? showResults : qNext;
-  document.getElementById('qz-exp').style.display = 'none';
 
-  // Update score display
-  document.getElementById('qz-sc').textContent = '✅ ' + QZ.sCorr + '/' + QZ.sTotal +
-    ' (' + Math.round(QZ.sCorr/QZ.sTotal*100) + '%)';
+  // Mark as answered so Prev/Next know this Q has a selection
+  QZ.answered = true;
+}
 
-  // Save progress in background
-  const topic = q.topic || '';
-  saveActivity(QZ.subject, correct);
-  upsertProgress(QZ.subject, correct);
-  updateWeakStrongTopics(QZ.subject, topic, correct);
-  loadProgress();
-  checkAndSendStreakNotif();
+function commitPendingAnswer() {
+  // Called when moving away from a question — locks in the selected answer
+  if (!QZ.pending) return;
+  const { q, chosen } = QZ.pending;
+  const correct = chosen === q.correct_index;
+
+  // Only record once per question (not on revisit via Prev)
+  const alreadyInHistory = QZ.history.find(h => h.q.id === q.id);
+  if (!alreadyInHistory) {
+    QZ.sTotal++;
+    if (correct) QZ.sCorr++;
+    QZ.history.push({ q, chosen, correct });
+    // Save progress to DB
+    const topic = q.topic || '';
+    saveActivity(QZ.subject, correct);
+    upsertProgress(QZ.subject, correct);
+    updateWeakStrongTopics(QZ.subject, topic, correct);
+    loadProgress();
+    checkAndSendStreakNotif();
+    // Update score display
+    document.getElementById('qz-sc').textContent = '✅ ' + QZ.sCorr + '/' + QZ.sTotal +
+      ' (' + Math.round(QZ.sCorr / QZ.sTotal * 100) + '%)';
+  } else {
+    // Update existing history entry if answer changed
+    const entry = QZ.history.find(h => h.q.id === q.id);
+    if (entry && entry.chosen !== chosen) {
+      // Undo old score, apply new
+      if (entry.correct) QZ.sCorr--;
+      entry.chosen = chosen;
+      entry.correct = correct;
+      if (correct) QZ.sCorr++;
+      document.getElementById('qz-sc').textContent = '✅ ' + QZ.sCorr + '/' + QZ.sTotal +
+        ' (' + Math.round(QZ.sCorr / QZ.sTotal * 100) + '%)';
+    }
+  }
+  QZ.pending = null;
 }
 
 function qNext() {
+  commitPendingAnswer(); // lock in current answer before moving
   QZ.idx++;
   const isUnlimited = QZ.sessionLen === 0;
   if (!isUnlimited && QZ.idx >= QZ.qs.length) { showResults(); return; }
@@ -2093,11 +2118,13 @@ function qNext() {
 
 function qPrev() {
   if (QZ.idx <= 0) return;
+  commitPendingAnswer(); // lock in current answer before going back
   QZ.idx--;
   renderQ();
 }
 
 function showResults() {
+  commitPendingAnswer(); // lock in the last answer before showing results
   document.getElementById('qz-active').style.display = 'none';
   document.getElementById('qz-results').style.display = 'block';
 
