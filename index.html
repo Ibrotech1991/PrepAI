@@ -474,8 +474,44 @@ html{scroll-behavior:smooth;}
 /* ── PREVENT HORIZONTAL SCROLL ON ALL DEVICES ── */
 *{box-sizing:border-box;}
 html,body{max-width:100%;overflow-x:hidden;}
+
+/* ── QUILL EDITOR (Admin Note Writing) ── */
+#an-editor-toolbar{background:#2a2010;border:1.5px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0;padding:6px 8px;}
+#an-editor-toolbar .ql-formats{margin-right:8px;}
+#an-editor-toolbar button,#an-editor-toolbar select{color:#fff!important;background:transparent!important;}
+#an-editor-toolbar button:hover{background:rgba(255,122,0,.2)!important;border-radius:4px!important;}
+#an-editor{border:1.5px solid var(--border)!important;border-radius:0 0 10px 10px!important;font-family:'Nunito',sans-serif!important;}
+#an-editor .ql-editor{min-height:220px;font-size:14px;line-height:1.8;}
+#an-editor table{width:100%;border-collapse:collapse;margin:12px 0;}
+#an-editor table td,#an-editor table th{border:1.5px solid #ccc;padding:8px 12px;min-width:80px;}
+#an-editor table th{background:#f0f0f0;font-weight:700;}
+/* ── NOTE CONTENT (Student View) ── */
+.note-content{font-size:14px;font-weight:500;line-height:1.9;color:var(--text);margin-top:14px;}
+.note-content h1{font-size:20px;font-weight:900;color:var(--orange);margin:16px 0 8px;}
+.note-content h2{font-size:17px;font-weight:900;color:var(--yellow);margin:14px 0 6px;}
+.note-content h3{font-size:15px;font-weight:800;color:var(--teal);margin:12px 0 4px;}
+.note-content strong{font-weight:900;color:var(--text);}
+.note-content em{font-style:italic;}
+.note-content ul,.note-content ol{padding-left:24px;margin:8px 0;}
+.note-content li{margin-bottom:4px;}
+.note-content blockquote{border-left:4px solid var(--orange);padding:8px 14px;margin:12px 0;background:rgba(255,122,0,.06);border-radius:0 8px 8px 0;font-style:italic;}
+.note-content pre{background:rgba(0,0,0,.3);padding:12px 16px;border-radius:8px;overflow-x:auto;font-family:monospace;font-size:13px;}
+.note-content table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;}
+.note-content table th{background:rgba(255,122,0,.15);color:var(--orange);font-weight:900;padding:10px 12px;border:1.5px solid rgba(255,122,0,.25);text-align:left;}
+.note-content table td{padding:9px 12px;border:1.5px solid var(--border);vertical-align:top;}
+.note-content table tr:nth-child(even) td{background:rgba(255,255,255,.03);}
+.note-content .katex-display{margin:16px 0;overflow-x:auto;}
+.note-content .katex{font-size:1.1em;}
+.note-math-hint{font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;}
 </style>
   <script src='https://cdn.jotfor.ms/agent/embedjs/019cddb8be3c7cfdbf231f7d4ee901d7349d/embed.js'></script>
+  <!-- Quill rich editor (admin note writing) -->
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"/>
+  <!-- KaTeX (math formula rendering for students) -->
+  <link href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 </head>
 <body>
 <div class="blob blob1"></div>
@@ -1263,8 +1299,41 @@ CREATE POLICY IF NOT EXISTS "pub_ins_notes" ON storage.objects FOR INSERT WITH C
         <div><label class="al">Topic</label><select class="ai-sel" id="an-topic"></select></div>
       </div>
       <div class="fr full"><div><label class="al">Note Title</label><input class="ai-inp" id="an-title" placeholder="e.g. Organic Chemistry — Alkanes Summary"></div></div>
-      <div class="fr full"><div><label class="al">Note Content (students will read this)</label>
-        <textarea class="ai-ta" id="an-content" style="min-height:220px;" placeholder="Type the summary note here. Use clear headings, bullet points and examples…"></textarea>
+      <div class="fr full"><div><label class="al">Note Content (students will read this)
+          <span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:8px;">Supports rich text, tables, and math formulas (wrap in $...$ or $$...$$)</span>
+        </label>
+        <!-- Hidden field stores HTML for saving -->
+        <input type="hidden" id="an-content"/>
+        <!-- Quill toolbar + editor -->
+        <div id="an-editor-toolbar">
+          <span class="ql-formats">
+            <select class="ql-header"><option value="1">Heading 1</option><option value="2">Heading 2</option><option value="3">Heading 3</option><option selected>Normal</option></select>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-blockquote"></button>
+            <button class="ql-code-block"></button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-table-insert" title="Insert Table" onclick="insertNoteTable()" style="font-size:11px;font-weight:900;padding:2px 6px;color:var(--orange);">⊞ Table</button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-math-inline" title="Inline math: $x^2$" onclick="insertMath('inline')" style="font-size:11px;font-weight:900;padding:2px 6px;color:var(--teal);">∑ Math</button>
+            <button class="ql-math-block" title="Block math: $$x^2$$" onclick="insertMath('block')" style="font-size:11px;font-weight:900;padding:2px 6px;color:var(--teal);">∑∑ Block</button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-clean"></button>
+          </span>
+        </div>
+        <div id="an-editor" style="min-height:240px;background:#fff;color:#111;border-radius:0 0 10px 10px;font-size:14px;"></div>
       </div></div>
       <div class="fr full">
         <div>
@@ -3967,7 +4036,7 @@ async function loadNotes() {
       html += '<span style="color:var(--muted);font-size:18px;" id="narr-' + cardId + '">▾</span>';
       html += '</div>';
       html += '<div class="note-body" id="' + cardId + '">';
-      if (n.content) html += '<div class="note-content">' + escHtml(n.content) + '</div>';
+      if (n.content) html += '<div class="note-content" data-raw="' + encodeURIComponent(n.content) + '"></div>';
       if (n.pdf_url) html += '<a class="note-pdf-btn" href="' + n.pdf_url + '" target="_blank" rel="noopener">📥 Download PDF</a>';
       html += '</div></div>';
     });
@@ -3979,8 +4048,29 @@ async function loadNotes() {
 function toggleNoteCard(id) {
   const body = document.getElementById(id);
   const arr = document.getElementById('narr-' + id);
-  if (body) body.classList.toggle('open');
-  if (arr) arr.style.transform = body?.classList.contains('open') ? 'rotate(180deg)' : '';
+  if (!body) return;
+  body.classList.toggle('open');
+  if (arr) arr.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+  // Render note content HTML + math on first open
+  if (body.classList.contains('open')) {
+    const contentDiv = body.querySelector('.note-content[data-raw]');
+    if (contentDiv && contentDiv.dataset.raw) {
+      contentDiv.innerHTML = decodeURIComponent(contentDiv.dataset.raw);
+      delete contentDiv.dataset.raw;
+      // Render KaTeX math: $...$ inline and $$...$$ block
+      if (window.renderMathInElement) {
+        renderMathInElement(contentDiv, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\[', right: '\\]', display: true },
+            { left: '\\(', right: '\\)', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+  }
 }
 
 // Admin Notes CRUD
@@ -4015,7 +4105,7 @@ async function renderNoteTbl() {
 
 async function saveNote() {
   const title = document.getElementById('an-title').value.trim();
-  const noteContent = document.getElementById('an-content').value.trim();
+  const noteContent = window._noteQuill ? window._noteQuill.root.innerHTML.trim() : (document.getElementById('an-content').value || '');
   const subject = document.getElementById('an-sub').value;
   const topic = document.getElementById('an-topic').value;
   if (!title || !subject) { showToast('Subject and title required!', 'err'); return; }
@@ -4051,7 +4141,11 @@ async function editNote(id) {
   await loadAdmNoteTopics();
   setTimeout(() => { document.getElementById('an-topic').value = n.topic || ''; }, 300);
   document.getElementById('an-title').value = n.title;
-  document.getElementById('an-content').value = n.content || '';
+  if (window._noteQuill) {
+    window._noteQuill.root.innerHTML = n.content || '';
+  } else {
+    document.getElementById('an-content').value = n.content || '';
+  }
   document.getElementById('an-pdf').value = n.pdf_url || '';
   document.getElementById('note-form-ttl').textContent = '✏️ Edit Note';
   document.getElementById('save-note-btn').textContent = '💾 Update Note';
@@ -4763,6 +4857,51 @@ function openJotformAgent() {
     window.dispatchEvent(new CustomEvent('jotform-agent-open'));
   }, 300);
 }
+
+// ══════════════════════════════════════════
+//  QUILL RICH EDITOR — Admin Note Writing
+// ══════════════════════════════════════════
+function initNoteEditor() {
+  if (window._noteQuill) return; // already initialised
+  if (!window.Quill) { setTimeout(initNoteEditor, 300); return; }
+  window._noteQuill = new Quill('#an-editor', {
+    modules: { toolbar: '#an-editor-toolbar' },
+    theme: 'snow',
+    placeholder: 'Type your note here. Use headings, bullet points, tables and math formulas…'
+  });
+}
+
+function insertNoteTable() {
+  if (!window._noteQuill) return;
+  const rows = parseInt(prompt('Number of rows (e.g. 3):', '3')) || 3;
+  const cols = parseInt(prompt('Number of columns (e.g. 3):', '3')) || 3;
+  const header = '<tr>' + Array(cols).fill('<th>Heading</th>').join('') + '</tr>';
+  const bodyRows = Array(rows-1).fill(
+    '<tr>' + Array(cols).fill('<td>Cell</td>').join('') + '</tr>'
+  ).join('');
+  const tableHtml = '<table><thead>' + header + '</thead><tbody>' + bodyRows + '</tbody></table><p><br></p>';
+  const range = window._noteQuill.getSelection(true);
+  window._noteQuill.clipboard.dangerouslyPasteHTML(range ? range.index : 0, tableHtml);
+}
+
+function insertMath(type) {
+  if (!window._noteQuill) return;
+  const example = type === 'block'
+    ? prompt('Enter math formula (LaTeX):', 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}')
+    : prompt('Enter inline math formula (LaTeX):', 'ax^2 + bx + c = 0');
+  if (!example) return;
+  const wrapped = type === 'block' ? '$$' + example + '$$' : '$' + example + '$';
+  const range = window._noteQuill.getSelection(true);
+  window._noteQuill.insertText(range ? range.index : 0, wrapped);
+}
+
+// Init editor when admin navigates to Notes page
+const _origAPage = aPage;
+function aPage(id, btn) {
+  _origAPage(id, btn);
+  if (id === 'adm-notes') setTimeout(initNoteEditor, 100);
+}
+
 </script>
 
   <!-- Floating Ask AI Button -->
