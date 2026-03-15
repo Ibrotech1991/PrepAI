@@ -146,18 +146,18 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .rev-ans.correct-ans{background:rgba(0,201,167,.08);color:var(--teal);border:1.5px dashed var(--teal);}
 .rev-exp{font-size:12px;color:var(--muted);font-weight:600;line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
 /* CHAT */
-.chat-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;display:flex;flex-direction:column;height:520px;}
-.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;}
-.cm{max-width:84%;}.cm.user{align-self:flex-end;}.cm.ai{align-self:flex-start;}
-.cm-sndr{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:5px;}.cm.user .cm-sndr{text-align:right;}
-.cm-bubble{padding:12px 16px;border-radius:16px;font-size:14px;font-weight:600;line-height:1.65;}
+
+
+.cm.user{align-self:flex-end;}.cm.ai{align-self:flex-start;}
+
+
 .cm.user .cm-bubble{background:linear-gradient(135deg,var(--orange),#FF5500);color:#fff;border-radius:16px 16px 4px 16px;}
-.cm.ai .cm-bubble{background:var(--card2);border:1.5px solid var(--border);border-radius:16px 16px 16px 4px;}
-.chat-foot{display:flex;gap:10px;padding:14px;border-top:1.5px solid var(--border);}
-.chat-inp{flex:1;background:var(--card2);border:1.5px solid var(--border);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;padding:12px 14px;border-radius:14px;outline:none;transition:.2s;resize:none;}
-.chat-inp:focus{border-color:var(--orange);}.chat-inp::placeholder{color:var(--muted);}
-.send-btn{background:linear-gradient(135deg,var(--orange),#FF5500);color:#fff;border:none;border-radius:14px;width:46px;cursor:pointer;font-size:18px;transition:.2s;display:flex;align-items:center;justify-content:center;}
-.send-btn:hover{transform:scale(1.05);}
+
+
+
+
+
+
 /* PROGRESS */
 .prog-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 .prog-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;}
@@ -503,6 +503,17 @@ html,body{max-width:100%;overflow-x:hidden;}
 .note-content .katex-display{margin:16px 0;overflow-x:auto;}
 .note-content .katex{font-size:1.1em;}
 .note-math-hint{font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;}
+
+/* ── AI MODE TOGGLE BUTTONS ── */
+
+.ai-mode-btn.active{background:linear-gradient(135deg,rgba(255,122,0,.2),rgba(255,210,52,.1));border-color:var(--orange);color:var(--orange);}
+.ai-mode-btn:hover{border-color:var(--orange);color:var(--orange);}
+/* ── IMAGE QUICK PROMPT CHIPS ── */
+
+.img-quick-btn:hover{background:rgba(0,201,167,.18);border-color:var(--teal);}
+/* ── IMAGE GENERATING SPINNER ── */
+
+
 </style>
   <!-- Quill rich editor (admin note writing) -->
   <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"/>
@@ -570,7 +581,7 @@ html,body{max-width:100%;overflow-x:hidden;}
     <div class="nav-center">
       <button class="nb active" onclick="sPage('dashboard',this)">🏠 Home</button>
       <button class="nb" onclick="sPage('quiz',this)">📝 Quiz</button>
-      <button class="nb" onclick="sPage('ask',this)">🤖 Ask AI</button>
+      
       <button class="nb" onclick="sPage('guide',this)">📖 Study Guide</button>
       <button class="nb" onclick="sPage('progress',this)">📊 Progress</button>
       <button class="nb" onclick="sPage('essay',this)">✍️ Essays</button>
@@ -597,7 +608,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   <div class="mob-nav"><div class="mob-nav-inner">
     <button class="mob-nb active" onclick="sPageM('dashboard',this)"><span class="ico">🏠</span>Home<div class="mob-dot"></div></button>
     <button class="mob-nb" onclick="sPageM('quiz',this)"><span class="ico">📝</span>Quiz<div class="mob-dot"></div></button>
-    <button class="mob-nb" onclick="sPageM('ask',this)"><span class="ico">🤖</span>Ask AI<div class="mob-dot"></div></button>
+    
     <button class="mob-nb" onclick="sPageM('guide',this)"><span class="ico">📖</span>Guide<div class="mob-dot"></div></button>
     <button class="mob-nb" onclick="sPageM('progress',this)"><span class="ico">📊</span>Progress<div class="mob-dot"></div></button>
     <button class="mob-nb" onclick="sPageM('essay',this)"><span class="ico">✍️</span>Essays<div class="mob-dot"></div></button>
@@ -742,22 +753,6 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
 
   </div></div>
-
-  <div id="sp-ask" class="page">
-    <div class="pw slim">
-      <div style="font-family:'Righteous',cursive;font-size:26px;color:var(--orange);margin-bottom:4px;">Ask AI Tutor 🤖</div>
-      <div style="color:var(--muted);font-size:13px;font-weight:600;margin-bottom:18px;">Ask anything WAEC — topics, calculations, past questions, exam tips!</div>
-      <div class="chat-card">
-        <div class="chat-msgs" id="chat-msgs">
-          <div class="cm ai"><div class="cm-sndr">PAADI MI 🤖</div><div class="cm-bubble">Hi! 👋 I'm your personal WAEC tutor. Ask me anything — Biology, Maths, Physics, Commerce — Let's get that A1! 🎓🔥</div></div>
-        </div>
-        <div class="chat-foot">
-          <textarea class="chat-inp" id="chat-inp" rows="1" placeholder="e.g. Explain photosynthesis for WAEC Biology…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
-          <button class="send-btn" onclick="sendChat()">➤</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div id="sp-guide" class="page"><div class="pw">
     <!-- Hero -->
@@ -2215,73 +2210,6 @@ async function incQuizCount() {
 // ══════════════════════════════════════════
 //  CHATGPT AI
 // ══════════════════════════════════════════
-// OpenAI calls go through your Cloudflare Worker proxy (key is stored there as a secret).
-// After deploying your worker, paste its URL here:
-const AI_PROXY_URL = 'https://prepai-proxy.YOUR-SUBDOMAIN.workers.dev/chat';
-
-function checkAIKey() {
-  const banner = document.getElementById('ai-setup-banner');
-  if (banner) banner.style.display = OPENAI_KEY === 'PASTE_YOUR_OPENAI_API_KEY_HERE' ? 'block' : 'none';
-}
-
-async function callGPT(systemPrompt, userMsg, maxTokens=900) {
-  if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR-SUBDOMAIN')) {
-    throw new Error('AI proxy not configured. Deploy the Cloudflare Worker and update AI_PROXY_URL.');
-  }
-  const res = await fetch(AI_PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMsg }
-      ]
-    })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error('AI error: ' + (err?.error?.message || 'HTTP ' + res.status));
-  }
-  const data = await res.json();
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Empty response from AI.');
-  return text;
-}
-
-async function sendChat() {
-  const inp = document.getElementById('chat-inp');
-  const msg = inp.value.trim();
-  if (!msg) return;
-  inp.value = '';
-  addMsg('user', msg);
-  const thinking = addMsg('ai', '⏳ Thinking…');
-  try {
-    const system = 'You are PAADI MI, a friendly and encouraging WAEC/NECO exam tutor for Nigerian secondary school students' +
-      (CU?.department ? ' studying ' + CU.department + ' subjects' : '') + '. ' +
-      'Give clear, step-by-step explanations using simple language students can understand. ' +
-      'Use Nigerian context and examples where helpful. Be warm, motivating, and concise. ' +
-      'Always end with one quick exam tip. Use plain text only — no markdown symbols.';
-    const reply = await callGPT(system, msg, 900);
-    thinking.querySelector('.cm-bubble').textContent = reply;
-  } catch(e) {
-    thinking.querySelector('.cm-bubble').textContent = '⚠️ ' + (e.message || 'Connection error. Please try again.');
-  }
-  const box = document.getElementById('chat-msgs');
-  box.scrollTop = box.scrollHeight;
-}
-
-function addMsg(role, text) {
-  const box = document.getElementById('chat-msgs');
-  const d = document.createElement('div');
-  d.className = 'cm ' + role;
-  d.innerHTML = '<div class="cm-sndr">' + (role === 'user' ? 'You 🙋' : 'PAADI MI 🤖') + '</div>' +
-    '<div class="cm-bubble">' + text + '</div>';
-  box.appendChild(d);
-  box.scrollTop = box.scrollHeight;
-  return d;
-}
 
 // ══════════════════════════════════════════
 //  PROGRESS PAGE
@@ -4588,6 +4516,35 @@ function toggleMarkingGuide(id) {
   }
 }
 
+// AI call used by Essay AI Feedback
+const AI_PROXY_URL = 'https://prepai-proxy.YOUR-SUBDOMAIN.workers.dev/chat';
+
+async function callGPT(systemPrompt, userMsg, maxTokens=900) {
+  if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR-SUBDOMAIN')) {
+    throw new Error('AI proxy not configured. Update AI_PROXY_URL with your Cloudflare Worker URL.');
+  }
+  const res = await fetch(AI_PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      max_tokens: maxTokens,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMsg }
+      ]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('AI error: ' + (err?.error?.message || 'HTTP ' + res.status));
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Empty response from AI.');
+  return text;
+}
+
 async function getEssayFeedback(id, answer, essay) {
   if (!answer || answer.trim().length < 30) {
     showToast('Write at least a paragraph before requesting feedback!', 'err'); return;
@@ -4887,6 +4844,10 @@ function insertMath(type) {
 }
 
 
+
+// ══════════════════════════════════════════
+//  AI IMAGE GENERATION (DALL-E 3)
+// ══════════════════════════════════════════
 </script>
 
 
