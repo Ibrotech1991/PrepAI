@@ -585,6 +585,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="nb" onclick="sPage('guide',this)">📖 Study Guide</button>
       <button class="nb" onclick="sPage('progress',this)">📊 Progress</button>
       <button class="nb" onclick="sPage('essay',this)">✍️ Essays</button>
+      <button class="nb" onclick="sPage('syllabus',this)">📋 WAEC Syllabus</button>
     </div>
     <div class="nav-right">
       <div style="position:relative;margin-right:8px;">
@@ -612,6 +613,7 @@ html,body{max-width:100%;overflow-x:hidden;}
     <button class="mob-nb" onclick="sPageM('guide',this)"><span class="ico">📖</span>Guide<div class="mob-dot"></div></button>
     <button class="mob-nb" onclick="sPageM('progress',this)"><span class="ico">📊</span>Progress<div class="mob-dot"></div></button>
     <button class="mob-nb" onclick="sPageM('essay',this)"><span class="ico">✍️</span>Essays<div class="mob-dot"></div></button>
+    <button class="mob-nb" onclick="sPageM('syllabus',this)"><span class="ico">📋</span>Syllabus<div class="mob-dot"></div></button>
     <button class="mob-nb" onclick="doLogout()"><span class="ico">🚪</span>Logout<div class="mob-dot"></div></button>
   </div></div>
 
@@ -943,6 +945,8 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="abn" onclick="aPage('adm-notes',this)">📄 Notes</button>
       <button class="abn" onclick="aPage('adm-notifs',this)">🔔 Notifications</button>
       <button class="abn" onclick="aPage('adm-essays',this)">✍️ Essays</button>
+      <button class="abn" onclick="aPage('adm-syllabus',this)">📋 Syllabus</button>
+      <button class="abn" onclick="aPage('adm-syllabus',this)">📋 Syllabus</button>
     </div>
     <button class="btn-out" onclick="adminLogout()" style="flex-shrink:0;">Logout</button>
   </nav>
@@ -1505,6 +1509,78 @@ ALTER TABLE essay_questions ADD COLUMN IF NOT EXISTS image_url text DEFAULT '';<
     </div>
   </div></div>
 
+  <!-- SECTION: Syllabus -->
+  <div id="adm-syllabus" class="admin-page"><div class="aw">
+    <div class="adm-sec-ttl">📋 WAEC Syllabus Manager</div>
+
+    <!-- SQL Setup Notice -->
+    <div class="sql-notice" id="syl-sql-notice">
+      <div style="font-size:13px;font-weight:900;color:var(--yellow);margin-bottom:8px;">⚙️ One-Time Supabase Setup Required</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Run this SQL in your Supabase SQL Editor, then create a <strong>syllabus-docs</strong> storage bucket (public):</div>
+      <pre style="font-size:11px;background:rgba(0,0,0,.3);padding:12px;border-radius:8px;overflow-x:auto;color:var(--text);">CREATE TABLE IF NOT EXISTS syllabus_docs (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  title text NOT NULL,
+  department text DEFAULT 'All',
+  file_url text DEFAULT '',
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE syllabus_docs DISABLE ROW LEVEL SECURITY;</pre>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="aform">
+      <div class="aform-ttl">➕ Upload Syllabus Document</div>
+      <div class="fr" style="grid-template-columns:1fr 1fr;">
+        <div>
+          <label class="al">Title</label>
+          <input class="ai-inp" id="adm-syl-title" placeholder="e.g. WAEC Mathematics Syllabus 2024">
+        </div>
+        <div>
+          <label class="al">Department</label>
+          <select class="ai-sel" id="adm-syl-dept">
+            <option value="All">All Departments</option>
+            <option value="Science">Science</option>
+            <option value="Arts">Arts</option>
+            <option value="Commercial">Commercial</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- File Upload -->
+      <div class="fr full"><div>
+        <label class="al">Upload File <span style="color:var(--muted);font-weight:600;">(PDF or DOC/DOCX)</span></label>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+          <label style="cursor:pointer;background:rgba(255,122,0,.12);border:1.5px dashed rgba(255,122,0,.4);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:800;color:var(--orange);display:flex;align-items:center;gap:8px;">
+            📁 Choose File
+            <input type="file" id="adm-syl-file" accept=".pdf,.doc,.docx" style="display:none;" onchange="admSylFileSelected(this)">
+          </label>
+          <span id="adm-syl-file-name" style="font-size:12px;font-weight:700;color:var(--muted);">No file chosen</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:800;color:var(--muted);">Or paste URL:</span>
+          <input class="ai-inp" id="adm-syl-url" placeholder="https://example.com/syllabus.pdf" style="flex:1;min-width:200px;">
+        </div>
+        <!-- Progress bar -->
+        <div id="adm-syl-progress" style="display:none;margin-top:10px;">
+          <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+            <div id="adm-syl-bar" style="height:100%;background:var(--orange);width:0%;transition:width .2s;border-radius:4px;"></div>
+          </div>
+          <div id="adm-syl-pct" style="font-size:11px;font-weight:700;color:var(--muted);margin-top:4px;">0%</div>
+        </div>
+      </div></div>
+
+      <button class="btn-y" onclick="admUploadSyllabus()" id="adm-syl-btn">💾 Save Syllabus</button>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="aform" style="margin-top:20px;">
+      <div class="aform-ttl">📂 Uploaded Syllabuses</div>
+      <div id="adm-syl-list" style="margin-top:12px;">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
+  </div></div>
+
 
 
 <script>
@@ -1735,7 +1811,14 @@ function sPage(n, btn) {
   if (n === 'quiz') buildQSel();
   if (n === 'guide') initGuide();
   if (n === 'essay') { initEssayPage(); loadEssays(); }
-  // Hide FAB when already on Ask AI page, show on all other pages
+  if (n === 'syllabus') {
+    loadSyllabus();
+    // Show upload panel if admin secret session is active
+    const sess = JSON.parse(sessionStorage.getItem('pai_sess') || '{}');
+    const uploadPanel = document.getElementById('syl-admin-upload');
+    if (uploadPanel) uploadPanel.style.display = sess.type === 'admin' ? 'block' : 'none';
+  }
+  if (n === 'syllabus') initSyllabus();
 
 }
 
@@ -1749,6 +1832,21 @@ function sPageM(n, btn) {
   if (n === 'quiz') buildQSel();
   if (n === 'guide') initGuide();
   if (n === 'essay') { initEssayPage(); loadEssays(); }
+  if (n === 'syllabus') {
+    loadSyllabus();
+    // Show upload panel if admin secret session is active
+    const sess = JSON.parse(sessionStorage.getItem('pai_sess') || '{}');
+    const uploadPanel = document.getElementById('syl-admin-upload');
+    if (uploadPanel) uploadPanel.style.display = sess.type === 'admin' ? 'block' : 'none';
+  }
+  if (n === 'syllabus') {
+    loadSyllabus();
+    // Show upload panel if admin secret session is active
+    const sess = JSON.parse(sessionStorage.getItem('pai_sess') || '{}');
+    const uploadPanel = document.getElementById('syl-admin-upload');
+    if (uploadPanel) uploadPanel.style.display = sess.type === 'admin' ? 'block' : 'none';
+  }
+  if (n === 'syllabus') initSyllabus();
   // Hide FAB when already on Ask AI page
 
 }
@@ -2332,6 +2430,7 @@ function aPage(id, btn) {
   if (id === 'adm-notes') { initAdminNotes(); setTimeout(initNoteEditor, 150); }
   if (id === 'adm-notifs') initAdminNotifs();
   if (id === 'adm-essays') initAdminEssays();
+  if (id === 'adm-syllabus') admLoadSyllabus();
 }
 async function renderAdmDash(){
   const [{data:students},{data:questions},{data:subjects},{data:stats}] = await Promise.all([
@@ -4881,6 +4980,342 @@ function insertMath(type) {
 
 
   <!-- JotForm AI Agent Widget (student portal) -->
-  <script src='https://cdn.jotfor.ms/agent/embedjs/019cf0db7c8a7ab48bf6030742538538425f/embed.js'></script>
+  <script src='https://cdn.jotfor.ms/agent/embedjs/019cf0db7c8a7ab48bf6030742538538425f/embed.js'>
+// ══════════════════════════════════════════
+//  WAEC SYLLABUS PAGE
+// ══════════════════════════════════════════
+
+let sylFile = null;
+
+function initSyllabus() {
+  // Show upload panel only if admin is viewing (won't happen in student portal, but safe guard)
+  loadSyllabus();
+}
+
+async function loadSyllabus() {
+  const list = document.getElementById('syl-list');
+  if (!list) return;
+  list.innerHTML = '<div class="empty">Loading syllabus documents…</div>';
+
+  const { data, error } = await sb.from('syllabus_docs').select('*').order('department').order('title');
+  const docs = data || [];
+
+  if (!docs.length) {
+    list.innerHTML = '<div class="empty">No syllabus documents uploaded yet. Check back soon! 📋</div>';
+    return;
+  }
+
+  // Group by department
+  const grouped = {};
+  docs.forEach(d => {
+    const dept = d.department || 'General';
+    if (!grouped[dept]) grouped[dept] = [];
+    grouped[dept].push(d);
+  });
+
+  const deptColors = { Science: 'var(--teal)', Arts: 'var(--pink)', Commercial: 'var(--yellow)', General: 'var(--orange)', All: 'var(--orange)' };
+  const deptIcons  = { Science: '🔬', Arts: '🎨', Commercial: '💼', General: '📋', All: '📋' };
+
+  let html = '';
+  // Show student's own department first, then others
+  const userDept = CU?.department || '';
+  const deptOrder = userDept
+    ? [userDept, ...Object.keys(grouped).filter(d => d !== userDept && d !== 'All'), 'All']
+    : Object.keys(grouped);
+
+  deptOrder.filter(d => grouped[d]).forEach(dept => {
+    const color = deptColors[dept] || 'var(--orange)';
+    const icon  = deptIcons[dept]  || '📋';
+    html += '<div style="margin-bottom:28px;">';
+    html += '<div style="font-size:15px;font-weight:900;color:' + color + ';margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;">' +
+      icon + ' ' + dept + ' Department' +
+      (dept === userDept ? ' <span style="font-size:10px;background:rgba(255,122,0,.15);color:var(--orange);padding:2px 8px;border-radius:20px;font-weight:900;">YOUR DEPT</span>' : '') +
+      '</div>';
+
+    grouped[dept].forEach(doc => {
+      const isPdf = doc.file_url && doc.file_url.toLowerCase().includes('.pdf');
+      const isDoc = doc.file_url && (doc.file_url.toLowerCase().includes('.doc'));
+      const fileIcon = isPdf ? '📄' : isDoc ? '📝' : '📎';
+      const fileType = isPdf ? 'PDF' : isDoc ? 'DOC' : 'File';
+
+      html += '<div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">';
+      html += '<div style="width:44px;height:44px;background:rgba(255,122,0,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">' + fileIcon + '</div>';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:14px;font-weight:900;margin-bottom:3px;">' + escHtml(doc.title) + '</div>';
+      html += '<div style="font-size:11px;font-weight:700;color:var(--muted);">' + fileType + ' · Uploaded ' + new Date(doc.created_at).toLocaleDateString('en-NG', {day:'numeric',month:'short',year:'numeric'}) + '</div>';
+      html += '</div>';
+      if (doc.file_url) {
+        html += '<div style="display:flex;gap:8px;flex-shrink:0;">';
+        if (isPdf) {
+          html += '<button class="btn-s" style="font-size:12px;padding:8px 14px;" onclick="viewPdf('' + doc.file_url + '')">👁 View</button>';
+        }
+        html += '<a href="' + doc.file_url + '" target="_blank" download class="btn-p" style="font-size:12px;padding:8px 14px;text-decoration:none;">📥 Download</a>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  list.innerHTML = html;
+}
+
+function viewPdf(url) {
+  // Open PDF in a modal overlay inside the app
+  const existing = document.getElementById('pdf-viewer-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'pdf-viewer-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;flex-direction:column;';
+  modal.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--card);border-bottom:1.5px solid var(--border);">' +
+      '<div style="font-size:14px;font-weight:900;color:var(--orange);">📄 Syllabus Viewer</div>' +
+      '<button onclick="document.getElementById('pdf-viewer-modal').remove()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>' +
+    '</div>' +
+    '<iframe src="' + url + '" style="flex:1;border:none;width:100%;" title="Syllabus PDF"></iframe>';
+  document.body.appendChild(modal);
+}
+
+function sylFileSelected(input) {
+  sylFile = input.files[0];
+  const nameEl = document.getElementById('syl-file-name');
+  if (nameEl) nameEl.textContent = sylFile ? sylFile.name : 'No file chosen';
+}
+
+async function uploadSyllabus() {
+  const title = document.getElementById('syl-title')?.value.trim();
+  const dept  = document.getElementById('syl-dept')?.value || 'All';
+  const urlVal = document.getElementById('syl-url')?.value.trim();
+  const btn   = document.getElementById('syl-upload-btn');
+
+  if (!title) { showToast('Please enter a title for this syllabus.', 'err'); return; }
+  if (!sylFile && !urlVal) { showToast('Please choose a file or paste a URL.', 'err'); return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  let file_url = urlVal;
+
+  if (sylFile && !urlVal) {
+    // Upload file to Supabase storage
+    const ext  = sylFile.name.split('.').pop().toLowerCase();
+    const path = 'syllabus/' + Date.now() + '_' + title.replace(/\s+/g,'_').slice(0,40) + '.' + ext;
+    const prog = document.getElementById('syl-upload-progress');
+    const bar  = document.getElementById('syl-up-bar');
+    const pct  = document.getElementById('syl-up-pct');
+    if (prog) prog.style.display = 'block';
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress = Math.min(progress + Math.random() * 15, 90);
+      if (bar) bar.style.width = progress + '%';
+      if (pct) pct.textContent = Math.round(progress) + '%';
+    }, 200);
+
+    const buf = await sylFile.arrayBuffer();
+    const { error: upErr } = await sb.storage.from('syllabus-docs').upload(path, buf, {
+      contentType: sylFile.type || 'application/pdf', cacheControl: '3600', upsert: true
+    });
+    clearInterval(interval);
+    if (bar) bar.style.width = '100%';
+    if (pct) pct.textContent = '100%';
+    setTimeout(() => { if (prog) prog.style.display = 'none'; }, 1000);
+
+    if (upErr) {
+      showToast('Upload failed: ' + upErr.message, 'err');
+      btn.disabled = false; btn.textContent = '💾 Save Syllabus';
+      return;
+    }
+
+    const { data: urlData } = sb.storage.from('syllabus-docs').getPublicUrl(path);
+    file_url = urlData.publicUrl;
+  }
+
+  const { error } = await sb.from('syllabus_docs').insert([{ title, department: dept, file_url }]);
+  btn.disabled = false; btn.textContent = '💾 Save Syllabus';
+
+  if (error) { showToast('Save failed: ' + error.message, 'err'); return; }
+
+  showToast('Syllabus uploaded! ✅');
+  // Reset form
+  if (document.getElementById('syl-title')) document.getElementById('syl-title').value = '';
+  if (document.getElementById('syl-url'))   document.getElementById('syl-url').value = '';
+  if (document.getElementById('syl-file'))  document.getElementById('syl-file').value = '';
+  if (document.getElementById('syl-file-name')) document.getElementById('syl-file-name').textContent = 'No file chosen';
+  sylFile = null;
+  loadSyllabus();
+}
+
+async async function deleteSyllabus(id) {
+  if (!confirm('Delete this syllabus document?')) return;
+  const { error } = await sb.from('syllabus_docs').delete().eq('id', id);
+  if (error) { showToast('Delete failed: ' + error.message, 'err'); return; }
+  showToast('Deleted. ✅');
+  loadSyllabus();
+}
+
+
+// ══════════════════════════════════════════
+//  ADMIN SYLLABUS MANAGEMENT
+// ══════════════════════════════════════════
+let admSylFile = null;
+
+function admSylFileSelected(input) {
+  admSylFile = input.files[0];
+  const nameEl = document.getElementById('adm-syl-file-name');
+  if (nameEl) nameEl.textContent = admSylFile ? admSylFile.name : 'No file chosen';
+}
+
+async function admUploadSyllabus() {
+  const title  = document.getElementById('adm-syl-title')?.value.trim();
+  const dept   = document.getElementById('adm-syl-dept')?.value || 'All';
+  const urlVal = document.getElementById('adm-syl-url')?.value.trim();
+  const btn    = document.getElementById('adm-syl-btn');
+
+  if (!title) { showToast('Please enter a title.', 'err'); return; }
+  if (!admSylFile && !urlVal) { showToast('Please choose a file or paste a URL.', 'err'); return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  let file_url = urlVal;
+
+  if (admSylFile) {
+    const ext  = admSylFile.name.split('.').pop().toLowerCase();
+    const path = 'syllabus/' + Date.now() + '_' + title.replace(/\s+/g,'_').slice(0,40) + '.' + ext;
+    const prog = document.getElementById('adm-syl-progress');
+    const bar  = document.getElementById('adm-syl-bar');
+    const pct  = document.getElementById('adm-syl-pct');
+    if (prog) prog.style.display = 'block';
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress = Math.min(progress + Math.random() * 15, 90);
+      if (bar) bar.style.width = progress + '%';
+      if (pct) pct.textContent = Math.round(progress) + '%';
+    }, 200);
+
+    const buf = await admSylFile.arrayBuffer();
+    const { error: upErr } = await sb.storage.from('syllabus-docs').upload(path, buf, {
+      contentType: admSylFile.type || 'application/pdf', cacheControl: '3600', upsert: true
+    });
+    clearInterval(interval);
+    if (bar) bar.style.width = '100%';
+    if (pct) pct.textContent = '100%';
+    setTimeout(() => { if (prog) prog.style.display = 'none'; }, 1000);
+
+    if (upErr) {
+      showToast('Upload failed: ' + upErr.message, 'err');
+      btn.disabled = false; btn.textContent = '💾 Save Syllabus';
+      return;
+    }
+    const { data: urlData } = sb.storage.from('syllabus-docs').getPublicUrl(path);
+    file_url = urlData.publicUrl;
+  }
+
+  const { error } = await sb.from('syllabus_docs').insert([{ title, department: dept, file_url }]);
+  btn.disabled = false; btn.textContent = '💾 Save Syllabus';
+
+  if (error) { showToast('Save failed: ' + error.message, 'err'); return; }
+
+  showToast('Syllabus saved! ✅');
+  document.getElementById('adm-syl-title').value = '';
+  document.getElementById('adm-syl-url').value   = '';
+  document.getElementById('adm-syl-file').value  = '';
+  document.getElementById('adm-syl-file-name').textContent = 'No file chosen';
+  admSylFile = null;
+  admLoadSyllabus();
+}
+
+async function admLoadSyllabus() {
+  const list = document.getElementById('adm-syl-list');
+  if (!list) return;
+  list.innerHTML = '<div class="empty">Loading…</div>';
+
+  const { data, error } = await sb.from('syllabus_docs').select('*').order('created_at', { ascending: false });
+  const docs = data || [];
+
+  if (!docs.length) {
+    list.innerHTML = '<div class="empty">No syllabus documents uploaded yet.</div>';
+    return;
+  }
+
+  list.innerHTML = '<table class="adm-tbl"><thead><tr><th>Title</th><th>Department</th><th>Date</th><th>Actions</th></tr></thead><tbody>' +
+    docs.map(d => {
+      const isPdf = d.file_url && d.file_url.toLowerCase().includes('.pdf');
+      const isDoc = d.file_url && d.file_url.toLowerCase().includes('.doc');
+      const icon  = isPdf ? '📄' : isDoc ? '📝' : '📎';
+      return '<tr>' +
+        '<td><span style="font-size:16px;">' + icon + '</span> ' + escHtml(d.title) + '</td>' +
+        '<td><span style="font-size:11px;font-weight:800;background:rgba(255,122,0,.12);color:var(--orange);padding:3px 9px;border-radius:20px;">' + (d.department || 'All') + '</span></td>' +
+        '<td style="font-size:12px;color:var(--muted);">' + new Date(d.created_at).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) + '</td>' +
+        '<td style="display:flex;gap:6px;flex-wrap:wrap;">' +
+          (d.file_url ? '<a href="' + d.file_url + '" target="_blank" class="btn-s" style="font-size:11px;padding:5px 10px;text-decoration:none;">👁 View</a>' : '') +
+          '<button class="btn-s" style="font-size:11px;padding:5px 10px;color:var(--pink);border-color:var(--pink);" onclick="admDeleteSyllabus('' + d.id + '')">🗑 Delete</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+  '</tbody></table>';
+}
+
+async function admDeleteSyllabus(id) {
+  if (!confirm('Delete this syllabus document?')) return;
+  const { error } = await sb.from('syllabus_docs').delete().eq('id', id);
+  if (error) { showToast('Delete failed: ' + error.message, 'err'); return; }
+  showToast('Deleted ✅');
+  admLoadSyllabus();
+  loadSyllabus(); // refresh student view too
+}
+
+</script>
 </body>
 </html>
+  <!-- WAEC Syllabus Page -->
+  <div id="sp-syllabus" class="page">
+    <div class="pw">
+      <div style="font-family:'Righteous',cursive;font-size:26px;color:var(--orange);margin-bottom:4px;">📋 WAEC Syllabus</div>
+      <div style="color:var(--muted);font-size:13px;font-weight:600;margin-bottom:20px;">Official WAEC syllabus documents for all subjects. Download or view for your department.</div>
+
+      <!-- Upload area (Admin only — hidden for students) -->
+      <div id="syl-admin-upload" style="display:none;background:var(--card);border:1.5px dashed rgba(255,122,0,.4);border-radius:14px;padding:20px;margin-bottom:24px;">
+        <div style="font-size:14px;font-weight:900;color:var(--orange);margin-bottom:12px;">➕ Upload Syllabus Document</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <label class="al">Subject / Title</label>
+            <input class="ai-inp" id="syl-title" placeholder="e.g. Mathematics Syllabus 2024">
+          </div>
+          <div>
+            <label class="al">Department</label>
+            <select class="ai-sel" id="syl-dept">
+              <option value="All">All Departments</option>
+              <option value="Science">Science</option>
+              <option value="Arts">Arts</option>
+              <option value="Commercial">Commercial</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+          <label style="cursor:pointer;background:rgba(255,122,0,.12);border:1.5px dashed rgba(255,122,0,.4);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:800;color:var(--orange);display:flex;align-items:center;gap:8px;">
+            📁 Choose File (PDF or DOC)
+            <input type="file" id="syl-file" accept=".pdf,.doc,.docx" style="display:none;" onchange="sylFileSelected(this)">
+          </label>
+          <span id="syl-file-name" style="font-size:12px;font-weight:700;color:var(--muted);">No file chosen</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:800;color:var(--muted);">Or paste URL:</span>
+          <input class="ai-inp" id="syl-url" placeholder="https://..." style="flex:1;">
+        </div>
+        <button class="btn-y" onclick="uploadSyllabus()" id="syl-upload-btn" style="font-size:13px;">💾 Save Syllabus</button>
+        <div id="syl-upload-progress" style="display:none;margin-top:10px;">
+          <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+            <div id="syl-up-bar" style="height:100%;background:var(--orange);width:0%;transition:width .2s;border-radius:4px;"></div>
+          </div>
+          <div id="syl-up-pct" style="font-size:11px;font-weight:700;color:var(--muted);margin-top:4px;">0%</div>
+        </div>
+      </div>
+
+      <!-- Syllabus list -->
+      <div id="syl-list">
+        <div class="empty">Loading syllabuses…</div>
+      </div>
+    </div>
+  </div>
