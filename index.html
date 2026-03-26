@@ -102,7 +102,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 @keyframes cardIn{from{opacity:0;transform:scale(.97) translateY(8px);}to{opacity:1;transform:none;}}
 .q-num{font-size:11px;font-weight:900;color:var(--orange);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
 .q-txt{font-size:17px;font-weight:700;line-height:1.65;}
-.q-img{width:100%;max-height:260px;object-fit:contain;border-radius:14px;margin:14px 0;border:1.5px solid var(--border);}
+.q-img{width:100%;max-height:320px;object-fit:contain;border-radius:14px;margin:14px 0;border:1.5px solid var(--border);display:none;background:rgba(255,255,255,.04);}
 .q-yr{display:inline-block;margin-top:10px;font-size:11px;font-weight:800;color:var(--muted);background:var(--card2);padding:4px 12px;border-radius:10px;}
 .opts{display:flex;flex-direction:column;gap:10px;margin:16px 0;}
 .ob{background:var(--card);border:2px solid var(--border);color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:14px 18px;border-radius:14px;cursor:pointer;text-align:left;transition:.18s;display:flex;align-items:center;gap:12px;}
@@ -946,7 +946,6 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="abn" onclick="aPage('adm-notifs',this)">🔔 Notifications</button>
       <button class="abn" onclick="aPage('adm-essays',this)">✍️ Essays</button>
       <button class="abn" onclick="aPage('adm-syllabus',this)">📋 Syllabus</button>
-      <button class="abn" onclick="aPage('adm-syllabus',this)">📋 Syllabus</button>
     </div>
     <button class="btn-out" onclick="adminLogout()" style="flex-shrink:0;">Logout</button>
   </nav>
@@ -961,6 +960,7 @@ html,body{max-width:100%;overflow-x:hidden;}
     <button class="abn" onclick="aPage('adm-notes',this)" style="font-size:12px;padding:6px 12px;white-space:nowrap;">📄 Notes</button>
     <button class="abn" onclick="aPage('adm-notifs',this)" style="font-size:12px;padding:6px 12px;white-space:nowrap;">🔔 Notifs</button>
     <button class="abn" onclick="aPage('adm-essays',this)" style="font-size:12px;padding:6px 12px;white-space:nowrap;">✍️ Essays</button>
+      <button class="abn" onclick="aPage('adm-syllabus',this)" style="font-size:12px;padding:6px 12px;white-space:nowrap;">📋 Syllabus</button>
   </div>
 
   <div id="adm-dash" class="admin-page active"><div class="aw">
@@ -2092,11 +2092,26 @@ function renderQ() {
   document.getElementById('qpf').style.width = pct + '%';
 
   const img = document.getElementById('q-img');
-  if (q.image_url && q.image_url.trim() && q.image_url !== 'null') {
-    img.style.display = 'block'; img.src = '';
-    setTimeout(() => { img.src = q.image_url; }, 10);
-    img.onerror = () => { img.style.display = 'none'; };
-  } else { img.style.display = 'none'; }
+  const imgUrl = q.image_url;
+  if (imgUrl && typeof imgUrl === 'string' && imgUrl.trim() && imgUrl !== 'null' && imgUrl !== 'undefined') {
+    img.style.display = 'block';
+    img.src = '';
+    // Small delay ensures DOM is ready
+    setTimeout(() => {
+      img.src = imgUrl;
+      img.style.display = 'block';
+    }, 30);
+    img.onerror = () => {
+      console.warn('Quiz image failed to load:', imgUrl.substring(0,80));
+      img.style.display = 'none';
+    };
+    img.onload = () => {
+      img.style.display = 'block';
+    };
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+  }
 
   const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
   const L = ['A','B','C','D'];
@@ -2248,7 +2263,10 @@ function showResults() {
     const opts = typeof h.q.options === 'string' ? JSON.parse(h.q.options) : h.q.options;
     const userAns = opts[h.chosen] || '—';
     const corrAns = opts[h.q.correct_index] || '—';
-    const imgHtml = h.q.image_url ? `<img src="${h.q.image_url}" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:10px;margin:8px 0;border:1.5px solid var(--border);">` : '';
+    const imgUrl2 = h.q.image_url;
+    const imgHtml = (imgUrl2 && imgUrl2 !== 'null' && imgUrl2.trim())
+      ? `<img src="${imgUrl2}" style="max-width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin:8px 0;border:1.5px solid var(--border);display:block;" onerror="this.style.display='none'">`
+      : '';
     return `<div class="rev-card ${h.correct?'correct':'wrong'}">
       <div class="rev-q">${i+1}. ${h.q.question_text}</div>
       ${imgHtml}
@@ -2523,13 +2541,29 @@ async function prevImg(input) {
 }
 // Convert image to base64 and store directly in DB - no storage bucket needed
 function uploadImage(file) {
-  return new Promise((resolve) => {
-    // Resize large images before saving to keep DB size manageable
+  // Try Supabase Storage first, fall back to base64
+  return new Promise(async (resolve) => {
+    try {
+      const ext  = (file.name || 'image.jpg').split('.').pop().toLowerCase();
+      const path = 'questions/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+      const { error: upErr } = await sb.storage.from('question-images').upload(path, file, {
+        contentType: file.type || 'image/jpeg', cacheControl: '3600', upsert: true
+      });
+      if (!upErr) {
+        const { data: urlData } = sb.storage.from('question-images').getPublicUrl(path);
+        resolve(urlData.publicUrl);
+        return;
+      }
+      console.warn('Storage upload failed, using base64:', upErr.message);
+    } catch(e) {
+      console.warn('Storage error, using base64:', e.message);
+    }
+    // Fallback: base64 with resize
     const reader = new FileReader();
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        const MAX = 800;
+        const MAX = 1200;
         let w = img.width, h = img.height;
         if (w > MAX || h > MAX) {
           if (w > h) { h = Math.round(h * MAX/w); w = MAX; }
@@ -2537,10 +2571,9 @@ function uploadImage(file) {
         }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const base64 = canvas.toDataURL('image/jpeg', 0.82);
-        resolve(base64);
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const isPng = (file.type === 'image/png' || (file.name||'').toLowerCase().endsWith('.png'));
+        resolve(isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.88));
       };
       img.onerror = () => resolve(e.target.result);
       img.src = e.target.result;
@@ -5017,19 +5050,26 @@ async function loadSyllabus() {
   const deptIcons  = { Science: '🔬', Arts: '🎨', Commercial: '💼', General: '📋', All: '📋' };
 
   let html = '';
-  // Show student's own department first, then others
   const userDept = CU?.department || '';
-  const deptOrder = userDept
-    ? [userDept, ...Object.keys(grouped).filter(d => d !== userDept && d !== 'All'), 'All']
+
+  // Only show docs for student's department + 'All' docs
+  // Filter grouped to only include relevant depts
+  const relevantDepts = userDept
+    ? [userDept, 'All'].filter(d => grouped[d])
     : Object.keys(grouped);
 
-  deptOrder.filter(d => grouped[d]).forEach(dept => {
+  // If no dept-specific docs, show all (fallback)
+  const deptOrder = relevantDepts.length > 0 ? relevantDepts : Object.keys(grouped);
+
+  deptOrder.forEach(dept => {
+    if (!grouped[dept]) return;
     const color = deptColors[dept] || 'var(--orange)';
     const icon  = deptIcons[dept]  || '📋';
     html += '<div style="margin-bottom:28px;">';
+    const deptLabel = dept === 'All' ? 'All Departments' : dept + ' Department';
+    const deptBadge = dept === userDept ? ' <span style="font-size:10px;background:rgba(255,122,0,.15);color:var(--orange);padding:2px 8px;border-radius:20px;font-weight:900;">YOUR DEPT</span>' : '';
     html += '<div style="font-size:15px;font-weight:900;color:' + color + ';margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;">' +
-      icon + ' ' + dept + ' Department' +
-      (dept === userDept ? ' <span style="font-size:10px;background:rgba(255,122,0,.15);color:var(--orange);padding:2px 8px;border-radius:20px;font-weight:900;">YOUR DEPT</span>' : '') +
+      icon + ' ' + deptLabel + deptBadge +
       '</div>';
 
     grouped[dept].forEach(doc => {
@@ -5046,8 +5086,9 @@ async function loadSyllabus() {
       html += '</div>';
       if (doc.file_url) {
         html += '<div style="display:flex;gap:8px;flex-shrink:0;">';
-        if (isPdf) {
-          html += '<button class="btn-s" style="font-size:12px;padding:8px 14px;" onclick="viewPdf('' + doc.file_url + '')">👁 View</button>';
+        if (isPdf || doc.file_url) {
+          html += '<button class="btn-s" style="font-size:12px;padding:8px 14px;" data-url="' + encodeURIComponent(doc.file_url) + '" onclick="viewPdf(decodeURIComponent(this.dataset.url))">👁 View</button>';
+        }
         }
         html += '<a href="' + doc.file_url + '" target="_blank" download class="btn-p" style="font-size:12px;padding:8px 14px;text-decoration:none;">📥 Download</a>';
         html += '</div>';
@@ -5061,19 +5102,38 @@ async function loadSyllabus() {
 }
 
 function viewPdf(url) {
-  // Open PDF in a modal overlay inside the app
   const existing = document.getElementById('pdf-viewer-modal');
   if (existing) existing.remove();
 
   const modal = document.createElement('div');
   modal.id = 'pdf-viewer-modal';
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;flex-direction:column;';
-  modal.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--card);border-bottom:1.5px solid var(--border);">' +
-      '<div style="font-size:14px;font-weight:900;color:var(--orange);">📄 Syllabus Viewer</div>' +
-      '<button onclick="document.getElementById('pdf-viewer-modal').remove()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>' +
-    '</div>' +
-    '<iframe src="' + url + '" style="flex:1;border:none;width:100%;" title="Syllabus PDF"></iframe>';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--card);border-bottom:1.5px solid var(--border);';
+  hdr.innerHTML = '<div style="font-size:14px;font-weight:900;color:var(--orange);">📄 Syllabus Viewer</div>';
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px;';
+  closeBtn.onclick = () => modal.remove();
+  hdr.appendChild(closeBtn);
+  modal.appendChild(hdr);
+
+  // Iframe
+  const frame = document.createElement('iframe');
+  frame.src = url;
+  frame.style.cssText = 'flex:1;border:none;width:100%;height:100%;';
+  frame.title = 'Syllabus PDF';
+  modal.appendChild(frame);
+
+  // Also add direct download link for non-embeddable files
+  const footer = document.createElement('div');
+  footer.style.cssText = 'padding:8px 18px;background:var(--card);border-top:1.5px solid var(--border);display:flex;gap:10px;align-items:center;';
+  footer.innerHTML = '<span style="font-size:12px;font-weight:700;color:var(--muted);">If the file does not display:</span>' +
+    '<a href="' + url + '" target="_blank" class="btn-s" style="font-size:12px;padding:6px 14px;text-decoration:none;">📥 Open / Download</a>';
+  modal.appendChild(footer);
+
   document.body.appendChild(modal);
 }
 
