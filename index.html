@@ -12,17 +12,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Righteous&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#1A1208;--card:#241A0D;--card2:#2E2010;--border:#3D2E14;--orange:#FF7A00;--yellow:#FFD234;--teal:#00C9A7;--pink:#FF5E8A;--blue:#5B9FFF;--text:#FFF3E0;--muted:#9A7B55;--r:16px;--r2:24px;}
+:root{
+  --bg:#F0F4F8;
+  --card:#FFFFFF;
+  --card2:#F7FAFC;
+  --border:#E2E8F0;
+  --orange:#2563EB;
+  --yellow:#0EA5E9;
+  --teal:#10B981;
+  --pink:#F43F5E;
+  --blue:#2563EB;
+  --text:#1E293B;
+  --muted:#64748B;
+  --r:16px;
+  --r2:24px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.05);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.08),0 4px 6px rgba(0,0,0,.05);
+}
 *{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:#F1F5F9;}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px;}
 .screen{display:none;min-height:100vh;}.screen.active{display:block;}
 #auth-screen.active,#admin-login-screen.active,#loading-screen.active{display:flex;align-items:center;justify-content:center;padding:20px;}
 .blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
 .blob1{width:400px;height:400px;background:rgba(255,122,0,.12);top:-100px;right:-100px;}
 .blob2{width:300px;height:300px;background:rgba(0,201,167,.08);bottom:100px;left:-80px;}
 /* LOADING */
-#loading-screen{background:var(--bg);z-index:999;}
+#loading-screen{background:#1E40AF;z-index:999;}
 .loader-box{text-align:center;}
 .loader-logo{font-family:'Righteous',cursive;font-size:42px;color:var(--orange);margin-bottom:8px;}
 .loader-logo span{color:var(--yellow);}
@@ -59,16 +76,16 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;}
 .btn-out{background:none;border:1.5px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:10px;cursor:pointer;transition:.2s;}
 .btn-out:hover{border-color:var(--pink);color:var(--pink);}
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--border);z-index:100;padding:8px 4px 12px;}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#FFFFFF;border-top:1px solid var(--border);z-index:100;padding:8px 4px 12px;box-shadow:0 -2px 10px rgba(0,0,0,.08);}
 .mob-nav-inner{display:flex;justify-content:space-around;}
 .mob-nb{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;padding:6px 8px;border-radius:12px;cursor:pointer;transition:.2s;}
-.mob-nb .ico{font-size:20px;}.mob-nb.active{color:var(--orange);}
+.mob-nb .ico{font-size:20px;}.mob-nb.active{color:#2563EB;}
 .mob-dot{display:none;width:4px;height:4px;background:var(--orange);border-radius:50%;}.mob-nb.active .mob-dot{display:block;}
 /* PAGES */
 .page{display:none;padding-bottom:80px;}.page.active{display:block;}
 .pw{max-width:1100px;margin:0 auto;padding:24px 16px;}.pw.slim{max-width:780px;}
 /* DASHBOARD */
-.dash-hero{background:linear-gradient(135deg,#2A1500,#1F1200);border:1.5px solid var(--border);border-radius:var(--r2);padding:28px 24px;margin-bottom:20px;position:relative;overflow:hidden;}
+.dash-hero{background:linear-gradient(135deg,#1E40AF 0%,#2563EB 60%,#0EA5E9 100%);border-radius:var(--r2);padding:28px 24px;margin-bottom:20px;position:relative;overflow:hidden;}
 .dash-hero::before{content:'🎓';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.12;}
 .dash-hello{font-size:13px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
 .dash-title{font-size:28px;font-weight:900;line-height:1.25;margin-bottom:4px;}.dash-title span{color:var(--orange);}
@@ -77,7 +94,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .sc{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;transition:.2s;}
 .sc:hover{border-color:var(--orange);transform:translateY(-2px);}
 .sc-ico{font-size:22px;margin-bottom:8px;}.sc-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-.sc-val{font-family:'Righteous',cursive;font-size:26px;}.sc-val.o{color:var(--orange);}.sc-val.y{color:var(--yellow);}.sc-val.t{color:var(--teal);}
+.sc-val{font-family:'Righteous',cursive;font-size:26px;}.sc-val.o{color:var(--orange);}.sc-val.y{color:var(--yellow);}.sc-val.t{color:#10B981;}
 .sc-note{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;}
 .dept-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none;}
 .dept-scroll::-webkit-scrollbar{display:none;}
@@ -351,7 +368,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,122,0,.03);
 .vid-modal-close{position:absolute;top:16px;right:20px;color:#fff;font-size:28px;cursor:pointer;font-weight:900;z-index:10000;}
 
 /* NOTES */
-.note-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.note-card{background:#FFFFFF;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);}
 .note-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
 .note-ico{width:40px;height:40px;background:rgba(255,210,52,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .note-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
@@ -476,9 +493,9 @@ html{scroll-behavior:smooth;}
 html,body{max-width:100%;overflow-x:hidden;}
 
 /* ── QUILL EDITOR (Admin Note Writing) ── */
-#an-editor-toolbar{background:#2a2010;border:1.5px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0;padding:6px 8px;}
+#an-editor-toolbar{background:#F1F5F9;border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0;padding:6px 8px;}
 #an-editor-toolbar .ql-formats{margin-right:8px;}
-#an-editor-toolbar button,#an-editor-toolbar select{color:#fff!important;background:transparent!important;}
+#an-editor-toolbar button,#an-editor-toolbar select{color:#1E293B!important;background:transparent!important;}
 #an-editor-toolbar button:hover{background:rgba(255,122,0,.2)!important;border-radius:4px!important;}
 #an-editor{border:1.5px solid var(--border)!important;border-radius:0 0 10px 10px!important;font-family:'Nunito',sans-serif!important;}
 #an-editor .ql-editor{min-height:220px;font-size:14px;line-height:1.8;}
@@ -644,7 +661,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 
     <!-- STEP 1: Subject Selection -->
     <div id="qsel">
-      <div style="font-family:'Righteous',cursive;font-size:26px;color:var(--orange);margin-bottom:4px;">Choose a Subject</div>
+      <div style="font-family:'Righteous',cursive;font-size:26px;color:#2563EB;margin-bottom:4px;">Choose a Subject</div>
       <div style="color:var(--muted);font-size:13px;font-weight:600;margin-bottom:16px;">Pick a subject to start your quiz session</div>
       <div class="ssel-grid" id="qsel-grid"><div class="empty">Loading…</div></div>
     </div>
@@ -915,7 +932,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 
   <div id="sp-progress" class="page"><div class="pw">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
-      <div style="font-family:'Righteous',cursive;font-size:26px;color:var(--orange);">Your Progress 📊</div>
+      <div style="font-family:'Righteous',cursive;font-size:26px;color:#2563EB;">Your Progress 📊</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn-s" onclick="resetSubjectProgress()" style="font-size:12px;padding:8px 14px;border-color:var(--orange);color:var(--orange);">🔄 Reset Subject</button>
         <button class="btn-s" onclick="resetAllProgress()" style="font-size:12px;padding:8px 14px;border-color:var(--pink);color:var(--pink);">🗑️ Reset All</button>
@@ -3296,7 +3313,7 @@ function renderChecklist() {
   let html = '';
   Object.keys(grouped).forEach(function(sub) {
     html += '<div style="margin-bottom:20px;">';
-    html += '<div style="font-size:15px;font-weight:900;color:var(--orange);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border);">'+sub+'</div>';
+    html += '<div style="font-size:15px;font-weight:900;color:#2563EB;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #EFF6FF;">'+sub+'</div>';
     Object.keys(grouped[sub]).forEach(function(cat) {
       html += '<div class="chk-cat">'+cat+'</div>';
       grouped[sub][cat].forEach(function(topic) {
@@ -3850,7 +3867,7 @@ async function renderAnalytics() {
     window._recQs = recQs;
     recQs.forEach(function(q, ri) {
       html += '<div class="rec-card" onclick="startRecommendedQ(window._recQs['+ri+'].id)">';
-      html += '<div style="font-size:12px;font-weight:800;color:var(--orange);margin-bottom:4px;">' + q.subject + (q.topic ? ' · ' + q.topic : '') + '</div>';
+      html += '<div style="font-size:12px;font-weight:800;color:#2563EB;margin-bottom:4px;">' + q.subject + (q.topic ? ' · ' + q.topic : '') + '</div>';
       html += '<div style="font-size:13px;font-weight:700;line-height:1.5;">' + q.question_text.slice(0, 100) + (q.question_text.length > 100 ? '…' : '') + '</div>';
       html += '</div>';
     });
@@ -4114,7 +4131,7 @@ async function loadNotes() {
   let html = '';
   Object.keys(grouped).forEach((sub, si) => {
     html += '<div style="margin-bottom:20px;">';
-    html += '<div style="font-size:14px;font-weight:900;color:var(--orange);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border);">' + sub + '</div>';
+    html += '<div style="font-size:14px;font-weight:900;color:#2563EB;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #EFF6FF;">' + sub + '</div>';
     grouped[sub].forEach((n, ni) => {
       const cardId = 'nc-' + si + '-' + ni;
       html += '<div class="note-card">';
@@ -5327,12 +5344,17 @@ async function admDeleteSyllabus(id) {
 }
 
 </script>
+
+  <div style="text-align:center;padding:8px 0;font-size:11px;color:#94A3B8;font-weight:600;font-family:'Nunito',sans-serif;">
+    &copy; 2025 PAADI MI &nbsp;&middot;&nbsp; Built by <span style="color:#2563EB;font-weight:800;">@Ibrotech1991</span>
+  </div>
+
 </body>
 </html>
   <!-- WAEC Syllabus Page -->
   <div id="sp-syllabus" class="page">
     <div class="pw">
-      <div style="font-family:'Righteous',cursive;font-size:26px;color:var(--orange);margin-bottom:4px;">📋 WAEC Syllabus</div>
+      <div style="font-family:'Righteous',cursive;font-size:26px;color:#2563EB;margin-bottom:4px;">📋 WAEC Syllabus</div>
       <div style="color:var(--muted);font-size:13px;font-weight:600;margin-bottom:20px;">Official WAEC syllabus documents for all subjects. Download or view for your department.</div>
 
       <!-- Upload area (Admin only — hidden for students) -->
@@ -5379,3 +5401,5 @@ async function admDeleteSyllabus(id) {
       </div>
     </div>
   </div>
+
+
