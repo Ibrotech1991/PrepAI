@@ -39,12 +39,80 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .blob1{width:400px;height:400px;background:rgba(255,122,0,.12);top:-100px;right:-100px;}
 .blob2{width:300px;height:300px;background:rgba(0,201,167,.08);bottom:100px;left:-80px;}
 /* LOADING */
-#loading-screen{background:#1E40AF;z-index:999;}
-.loader-box{text-align:center;}
+#loading-screen{
+  background:linear-gradient(160deg,#1E3A8A 0%,#1D4ED8 45%,#0369A1 100%);
+  z-index:999;overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+/* animated background circles */
+.splash-circle{position:absolute;border-radius:50%;opacity:.08;animation:float 6s ease-in-out infinite;}
+.splash-c1{width:400px;height:400px;background:#fff;top:-120px;right:-100px;animation-delay:0s;}
+.splash-c2{width:300px;height:300px;background:#93C5FD;bottom:-80px;left:-80px;animation-delay:2s;}
+.splash-c3{width:200px;height:200px;background:#FCD34D;top:40%;right:-60px;animation-delay:4s;}
+@keyframes float{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.04);}}
+.loader-box{
+  text-align:center;
+  animation:splashIn .7s cubic-bezier(.175,.885,.32,1.275) forwards;
+  position:relative;z-index:2;
+  width:100%;max-width:380px;padding:0 32px;
+}
+@keyframes splashIn{
+  from{opacity:0;transform:translateY(30px) scale(.92);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
 .loader-logo{font-family:'Righteous',cursive;font-size:42px;color:var(--orange);margin-bottom:8px;}
 .loader-logo span{color:var(--yellow);}
-.loader-sub{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:28px;}
-.spinner{width:44px;height:44px;border:4px solid var(--border);border-top:4px solid var(--orange);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
+.loader-sub{
+  font-size:13px;color:rgba(255,255,255,.7);
+  font-weight:600;margin-bottom:0;margin-top:12px;
+  letter-spacing:.3px;
+}
+.splash-tagline{
+  font-size:15px;color:rgba(255,255,255,.85);
+  font-weight:700;margin-top:6px;
+  letter-spacing:.2px;
+}
+.splash-features{
+  display:flex;justify-content:center;gap:16px;
+  margin-top:28px;flex-wrap:wrap;
+}
+.splash-feat{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:20px;padding:5px 14px;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.85);
+  animation:splashIn .7s ease forwards;
+}
+.splash-feat:nth-child(1){animation-delay:.3s;opacity:0;}
+.splash-feat:nth-child(2){animation-delay:.5s;opacity:0;}
+.splash-feat:nth-child(3){animation-delay:.7s;opacity:0;}
+.spinner{
+  width:48px;height:48px;
+  border:3px solid rgba(255,255,255,.2);
+  border-top:3px solid #fff;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto;
+}
+.splash-progress{
+  width:180px;height:3px;
+  background:rgba(255,255,255,.2);
+  border-radius:2px;
+  margin:24px auto 0;
+  overflow:hidden;
+}
+.splash-progress-bar{
+  height:100%;width:0%;
+  background:#fff;
+  border-radius:2px;
+  animation:loadProgress 2.5s ease-in-out forwards;
+}
+@keyframes loadProgress{0%{width:0%;}60%{width:70%;}90%{width:90%;}100%{width:100%;}}
+.splash-dots{display:flex;justify-content:center;gap:8px;margin-top:20px;}
+.splash-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);animation:dotPulse 1.4s ease-in-out infinite;}
+.splash-dot:nth-child(2){animation-delay:.2s;}
+.splash-dot:nth-child(3){animation-delay:.4s;}
+@keyframes dotPulse{0%,80%,100%{transform:scale(1);background:rgba(255,255,255,.35);}40%{transform:scale(1.3);background:rgba(255,255,255,.9);}}
 @keyframes spin{to{transform:rotate(360deg);}}
 /* AUTH */
 .auth-wrap{position:relative;z-index:1;width:100%;max-width:440px;}
@@ -546,10 +614,46 @@ html,body{max-width:100%;overflow-x:hidden;}
 
 <!-- LOADING -->
 <div id="loading-screen" class="screen active">
+  <!-- Animated background circles -->
+  <div class="splash-circle splash-c1"></div>
+  <div class="splash-circle splash-c2"></div>
+  <div class="splash-circle splash-c3"></div>
+
   <div class="loader-box">
-    <div class="loader-logo"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyMDAgNjAiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJvZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRjdBMDAiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkZEMjM0Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ0ZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMEM5QTciLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDBBOEU4Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8IS0tIEJvb2sgaWNvbiAtLT4KICA8cmVjdCB4PSI0IiB5PSIxMCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0idXJsKCNvZykiIG9wYWNpdHk9IjAuOTUiLz4KICA8cmVjdCB4PSI4IiB5PSIxMCIgd2lkdGg9IjIiIGhlaWdodD0iNDAiIHJ4PSIxIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMjUpIi8+CiAgPGxpbmUgeDE9IjE0IiB5MT0iMjEiIHgyPSIzMiIgeTI9IjIxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ii8+CiAgPGxpbmUgeDE9IjE0IiB5MT0iMjciIHgyPSIzMiIgeTI9IjI3IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ii8+CiAgPGxpbmUgeDE9IjE0IiB5MT0iMzMiIHgyPSIyNiIgeTI9IjMzIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ii8+CiAgPCEtLSBTdGFyIHNwYXJrbGUgLS0+CiAgPGNpcmNsZSBjeD0iMzEiIGN5PSIzOCIgcj0iNyIgZmlsbD0idXJsKCN0ZykiLz4KICA8dGV4dCB4PSIzMSIgeT0iNDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iOSIgZmlsbD0id2hpdGUiIGZvbnQtd2VpZ2h0PSI5MDAiPuKYhTwvdGV4dD4KICA8IS0tIFBBQURJIHRleHQgLS0+CiAgPHRleHQgeD0iNDYiIHk9IjMwIiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssIEFyaWFsIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjIyIiBmaWxsPSJ1cmwoI29nKSIgbGV0dGVyLXNwYWNpbmc9IjEiPlBBQURJPC90ZXh0PgogIDwhLS0gTUkgdGV4dCAtLT4KICA8dGV4dCB4PSI0NiIgeT0iNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9InVybCgjdGcpIiBsZXR0ZXItc3BhY2luZz0iMyI+TUk8L3RleHQ+CiAgPCEtLSB0YWdsaW5lIGRvdCAtLT4KICA8Y2lyY2xlIGN4PSI3OSIgY3k9IjQ2IiByPSIyLjUiIGZpbGw9InVybCgjb2cpIi8+Cjwvc3ZnPg==" alt="PAADI MI" style="height:90px;width:auto;object-fit:contain;filter:brightness(1.05);"></div>
-    <div class="loader-sub">🇳🇬 Connecting to database…</div>
-    <div class="spinner"></div>
+    <!-- Logo -->
+    <div class="loader-logo" style="margin-bottom:20px;">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyMDAgNjAiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJvZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRjdBMDAiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkZEMjM0Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ0ZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMEM5QTciLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDBBOEU4Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8IS0tIEJvb2sgaWNvbiAtLT4KICA8cmVjdCB4PSI0IiB5PSIxMCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0idXJsKCNvZykiIG9wYWNpdHk9IjAuOTUiLz4KICA8cmVjdCB4PSI4IiB5PSIxMCIgd2lkdGg9IjIiIGhlaWdodD0iNDAiIHJ4PSIxIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMjUpIi8+CiAgPGxpbmUgeDE9IjE0IiB5MT0iMjEiIHgyPSIzMiIgeTI9IjIxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ii8+CiAgPGxpbmUgeDE9IjE0IiB5MT0iMjciIHgyPSIzMiIgeTI9IjI3IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ii8+CiAgPGxpbmUgeDE9IjE0IiB5MT0iMzMiIHgyPSIyNiIgeTI9IjMzIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ii8+CiAgPCEtLSBTdGFyIHNwYXJrbGUgLS0+CiAgPGNpcmNsZSBjeD0iMzEiIGN5PSIzOCIgcj0iNyIgZmlsbD0idXJsKCN0ZykiLz4KICA8dGV4dCB4PSIzMSIgeT0iNDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iOSIgZmlsbD0id2hpdGUiIGZvbnQtd2VpZ2h0PSI5MDAiPuKYhTwvdGV4dD4KICA8IS0tIFBBQURJIHRleHQgLS0+CiAgPHRleHQgeD0iNDYiIHk9IjMwIiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssIEFyaWFsIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjIyIiBmaWxsPSJ1cmwoI29nKSIgbGV0dGVyLXNwYWNpbmc9IjEiPlBBQURJPC90ZXh0PgogIDwhLS0gTUkgdGV4dCAtLT4KICA8dGV4dCB4PSI0NiIgeT0iNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9InVybCgjdGcpIiBsZXR0ZXItc3BhY2luZz0iMyI+TUk8L3RleHQ+CiAgPCEtLSB0YWdsaW5lIGRvdCAtLT4KICA8Y2lyY2xlIGN4PSI3OSIgY3k9IjQ2IiByPSIyLjUiIGZpbGw9InVybCgjb2cpIi8+Cjwvc3ZnPg==" alt="PAADI MI" style="height:140px;width:auto;object-fit:contain;filter:drop-shadow(0 8px 24px rgba(0,0,0,.3));"/>
+    </div>
+
+    <!-- Tagline -->
+    <div class="splash-tagline" style="margin-top:8px;">Your WAEC Victory Starts Here 🇳🇬</div>
+
+    <!-- Sub text -->
+    <div class="loader-sub">Smart Study. Real Results.</div>
+
+    <!-- Feature pills -->
+    <div class="splash-features">
+      <div class="splash-feat">📝 Quiz Practice</div>
+      <div class="splash-feat">✍️ Essay AI</div>
+      <div class="splash-feat">📊 Progress Tracking</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="splash-progress" style="margin-top:36px;">
+      <div class="splash-progress-bar"></div>
+    </div>
+
+    <!-- Animated dots -->
+    <div class="splash-dots">
+      <div class="splash-dot"></div>
+      <div class="splash-dot"></div>
+      <div class="splash-dot"></div>
+    </div>
+
+    <!-- Credit -->
+    <div style="margin-top:32px;font-size:10px;color:rgba(255,255,255,.4);font-weight:600;font-family:'Nunito',sans-serif;letter-spacing:.3px;">
+      &copy; 2025 PAADI MI &nbsp;&middot;&nbsp; Built by <span style="color:rgba(255,255,255,.65);">@Ibrotech1991</span>
+    </div>
   </div>
 </div>
 
@@ -1131,11 +1235,15 @@ html,body{max-width:100%;overflow-x:hidden;}
 
     <div class="aform" style="margin-top:20px;">
       <div class="aform-ttl">🏷️ Manage Topics</div>
+      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-weight:700;color:#92400E;">
+        ⚠️ If you see an RLS error, run this SQL in Supabase SQL Editor:<br>
+        <code style="background:#FEF3C7;padding:2px 6px;border-radius:4px;font-size:11px;display:block;margin-top:6px;">ALTER TABLE topics DISABLE ROW LEVEL SECURITY;</code>
+      </div>
       <div class="fr" style="grid-template-columns:1fr 1fr;">
         <div><label class="al">Subject</label><select class="ai-sel" id="tm-sub" onchange="loadTopicsList()"></select></div>
         <div><label class="al">New Topic Name</label>
           <div style="display:flex;gap:8px;">
-            <input class="ai-inp" id="tm-name" placeholder="e.g. Cell Biology" style="flex:1;">
+            <input class="ai-inp" id="tm-name" placeholder="e.g. Cell Biology" style="flex:1;" onkeydown="if(event.key==='Enter')addTopic()">
             <button class="btn-y" onclick="addTopic()" style="white-space:nowrap;">➕ Add</button>
           </div>
         </div>
@@ -2980,29 +3088,61 @@ async function loadTopicsList() {
     list.innerHTML = '<div style="color:var(--muted);font-size:12px;font-weight:700;">No topics yet for this subject.</div>';
     return;
   }
-  list.innerHTML = data.map(t =>
-    `<div style="display:flex;align-items:center;gap:6px;background:var(--card2);border:1.5px solid var(--border);border-radius:10px;padding:6px 12px;">
-      <span style="font-size:13px;font-weight:700;">${t.name}</span>
-      <button class="btn-del" style="padding:3px 8px;font-size:11px;" onclick="deleteTopic('${t.id}')">✕</button>
-    </div>`
-  ).join('');
+  const topicHtml = data.map(t => {
+    const tid = t.id;
+    return '<div style="display:inline-flex;align-items:center;gap:6px;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:20px;padding:5px 14px;">' +
+      '<span style="font-size:12px;font-weight:700;color:#1D4ED8;">' + escHtml(t.name) + '</span>' +
+      '<button style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;" data-tid="' + tid + '" onclick="deleteTopic(this.dataset.tid)">&#x00D7;</button>' +
+      '</div>';
+  }).join('');
+  list.innerHTML = '<div style="margin-bottom:10px;font-size:11px;font-weight:700;color:var(--muted);">' + data.length + ' topic' + (data.length!==1?'s':'') + ' for ' + sub + '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + topicHtml + '</div>';
 }
 
 async function addTopic() {
-  const sub = document.getElementById('tm-sub').value;
+  const sub  = document.getElementById('tm-sub').value;
   const name = document.getElementById('tm-name').value.trim();
-  if (!sub || !name) { showToast('Select a subject and enter topic name.', 'err'); return; }
+  if (!sub)  { showToast('Please select a subject first.', 'err'); return; }
+  if (!name) { showToast('Please enter a topic name.', 'err'); return; }
+
+  // Check if topic already exists for this subject first
+  const { data: existing } = await sb.from('topics')
+    .select('id').eq('subject', sub).eq('name', name).maybeSingle();
+  if (existing) {
+    showToast('Topic "' + name + '" already exists for this subject.', 'err');
+    return;
+  }
+
+  // Insert new topic
   const { error } = await sb.from('topics').insert([{ subject: sub, name }]);
-  if (error) { showToast('Topic already exists or error: ' + error.message, 'err'); return; }
+  if (error) {
+    // Handle duplicate key gracefully
+    if (error.code === '23505') {
+      showToast('Topic already exists for this subject.', 'err');
+    } else {
+      showToast('Error saving topic: ' + error.message, 'err');
+      console.error('Topic insert error:', error);
+    }
+    return;
+  }
+
   document.getElementById('tm-name').value = '';
-  showToast('Topic added: ' + name);
+  showToast('✅ Topic "' + name + '" added!');
   await loadTopicsList();
+  // Also refresh topic dropdowns in the question form
+  if (document.getElementById('nq-sub')?.value === sub) {
+    await loadAdmTopics();
+  }
 }
 
 async function deleteTopic(id) {
-  if (!confirm('Delete this topic?')) return;
-  await sb.from('topics').delete().eq('id', id);
-  showToast('Topic deleted.');
+  if (!confirm('Delete this topic? Questions using it will not be deleted.')) return;
+  const { error } = await sb.from('topics').delete().eq('id', id);
+  if (error) {
+    showToast('Error deleting topic: ' + error.message, 'err');
+    return;
+  }
+  showToast('Topic deleted ✅');
   await loadTopicsList();
 }
 
@@ -5401,5 +5541,3 @@ async function admDeleteSyllabus(id) {
       </div>
     </div>
   </div>
-
-
